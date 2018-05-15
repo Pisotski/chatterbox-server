@@ -11,7 +11,8 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-
+var body = {results: []};
+  
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -27,11 +28,28 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
+  
+  request.on('data', (chunk) => {
+    body.results.push(JSON.parse(chunk));
+    console.log('CHUNK ', chunk, chunk.username);
+  });
+  // .on('end', () => {
+  // body.results = Buffer.concat(body.results).toString();
+  // at this point, `body` has the entire request body stored in it as a string
+  // console.log(body.results[0].username);
+  // });
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-
+  response.on('end', () => {
+    console.log('No more data in response');
+  });
   // The outgoing status.
   var statusCode = 200;
-
+  if (request.method === 'POST') {
+    statusCode = 201;
+  }
+  if (request.url !== '/classes/messages') {
+    statusCode = 404;
+  }
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
@@ -50,9 +68,12 @@ var requestHandler = function(request, response) {
   // response.end() will be the body of the response - i.e. what shows
   // up in the browser.
   //
+
+  // var body = [{roomname: '', username: 'sm', text: 'qw'}, {roomname: '', username: 'sm', text: 'we'}, {roomname: '', username: '', text: ''}];
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  response.write(JSON.stringify(body));
+  response.end();
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -70,4 +91,5 @@ var defaultCorsHeaders = {
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
-
+exports.requestHandler = requestHandler;
+exports.body = body;
