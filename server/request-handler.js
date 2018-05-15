@@ -11,7 +11,10 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var bigBody = { results: [{roomname: '', username: 'sm', text: 'qw'}, {roomname: '', username: 'sm', text: 'we'}, {roomname: '', username: '', text: ''}] };
+var bigBody = { results: [] };
+var defaultID = 1;
+
+// var bigBody = { results: [{roomname: '', username: 'sm', text: 'qw'}, {roomname: '', username: 'sm', text: 'we'}, {roomname: '', username: '', text: ''}] };
 
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
@@ -37,7 +40,7 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json';
   
   var statusCode = 404;
   if (request.url !== '/classes/messages' && request.url !== '/chatterbox/classes/messages') {
@@ -53,8 +56,12 @@ var requestHandler = function(request, response) {
       body.push(chunk);
     }).on('end', () => {
       body = Buffer.concat(body).toString();
-      bigBody.results.push(JSON.parse(body));
-      response.end();
+      let newObj = JSON.parse(body);
+      newObj.objectId = defaultID;
+      defaultID += 1;
+      newObj.createdAt = Date.now();
+      bigBody.results.push(newObj);
+      response.end(JSON.stringify(bigBody));
     });
   }
   
