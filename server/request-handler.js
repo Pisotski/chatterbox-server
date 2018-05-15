@@ -12,6 +12,13 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var bigBody = { results: [{roomname: '', username: 'sm', text: 'qw'}, {roomname: '', username: 'sm', text: 'we'}, {roomname: '', username: '', text: ''}] };
+
+var defaultCorsHeaders = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept',
+  'access-control-max-age': 10 // Seconds.
+};
   
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -33,12 +40,12 @@ var requestHandler = function(request, response) {
   headers['Content-Type'] = 'text/plain';
   
   var statusCode = 404;
-  if (request.url !== '/classes/messages') {
+  if (request.url !== '/classes/messages' && request.url !== '/chatterbox/classes/messages') {
     response.writeHead(statusCode, headers);
     response.end();
   }
   
-  if (request.method === 'POST' && request.url === '/classes/messages') {
+  if (request.method === 'POST') {
     statusCode = 201;
     response.writeHead(statusCode, headers);
     let body = [];
@@ -51,13 +58,13 @@ var requestHandler = function(request, response) {
     });
   }
   
-  if (request.method === 'GET' && request.url === '/classes/messages') {
+  if (request.method === 'GET') {
     statusCode = 200;
     response.writeHead(statusCode, headers);
     response.end(JSON.stringify(bigBody));
   }
   
-  if (request.method === 'OPTIONS' && request.url === '/classes/messages') {
+  if (request.method === 'OPTIONS') {
     statusCode = 200;
     response.writeHead(statusCode, headers);
     response.end();
@@ -97,11 +104,6 @@ var requestHandler = function(request, response) {
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
-};
+
 exports.requestHandler = requestHandler;
 exports.bigBody = bigBody;

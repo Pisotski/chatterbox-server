@@ -129,5 +129,34 @@ describe('Node Server Request Listener Function', function() {
         expect(res._responseCode).to.equal(200);
       });
   });
+  it('Should respond 201 when sent to /chatterbox/classes/messages URL', function() {
+    var stubMsg = {
+      username: 'Jono',
+      text: 'Do my bidding!'
+    };
+    var req = new stubs.request('/chatterbox/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+    
+    handler.requestHandler(req, res);
 
+    expect(res._responseCode).to.equal(201);
+  });
+  it('Should respond 200 when sent to /chatterbox/classes/messages URL', function() {
+
+    var req = new stubs.request('/chatterbox/classes/messages', 'GET');
+    var res = new stubs.response();
+    
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+  });
+  it('Should display correct options when asked for OPTIONS', function() {
+
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+    
+    handler.requestHandler(req, res);
+
+    expect(res._headers['access-control-allow-methods']).to.equal('GET, POST, PUT, DELETE, OPTIONS');
+  });
 });
